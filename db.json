@@ -1,0 +1,59 @@
+{
+  "doctors": [
+    {
+      "id": "1",
+      "name": "Dr. Adarsh Babu",
+      "specialization": "Ophthalmologist",
+      "qualification": "MBBS, MS (Surgeon)",
+      "experience": "10+",
+      "rating": 4.8,
+      "reviews": 4942,
+      "patients": "5,000+",
+      "about": "15+ years of experience in all aspects of ophthalmology, including non-invasive and interventional procedures. Fellow of Sanskara netralaya, chennai.",
+      "services": ["Medicare", "Eye Surgery", "Consultation"],
+      "availability": {
+        "days": "Monday to Friday",
+        "hours": "10 AM TO 5 PM"
+      },
+      "image": "/placeholder.svg?height=80&width=80",
+      "location": "Dombivali"
+    },
+    {
+      "id": "2",
+      "name": "Dr. Priya Sharma",
+      "specialization": "Cardiologist",
+      "qualification": "MBBS, MD (Internal Medicine)",
+      "experience": "8+",
+      "rating": 4.7,
+      "reviews": 3245,
+      "patients": "3,500+",
+      "about": "Experienced cardiologist with expertise in preventive cardiology and interventional procedures.",
+      "services": ["Cardiology", "ECG", "Consultation"],
+      "availability": {
+        "days": "Monday to Saturday",
+        "hours": "9 AM TO 6 PM"
+      },
+      "image": "/placeholder.svg?height=80&width=80",
+      "location": "Mumbai"
+    },
+    {
+      "id": "3",
+      "name": "Dr. Rajesh Patel",
+      "specialization": "Dermatologist",
+      "qualification": "MBBS, MD (Dermatology)",
+      "experience": "12+",
+      "rating": 4.9,
+      "reviews": 2156,
+      "patients": "4,200+",
+      "about": "Specialist in skin disorders, cosmetic dermatology, and laser treatments.",
+      "services": ["Dermatology", "Cosmetic Treatment", "Laser Therapy"],
+      "availability": {
+        "days": "Tuesday to Sunday",
+        "hours": "11 AM TO 7 PM"
+      },
+      "image": "/placeholder.svg?height=80&width=80",
+      "location": "Pune"
+    }
+  ],
+  "appointments": []
+}
