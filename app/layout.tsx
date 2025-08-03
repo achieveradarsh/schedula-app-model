@@ -9,7 +9,7 @@ const inter = Inter({ subsets: ["latin"] })
 export const metadata: Metadata = {
   title: "Schedula - Your Health, Our Priority",
   description: "Book appointments with qualified doctors. Modern healthcare booking platform.",
-    generator: 'v0.dev'
+    generator: 'adarsh'
 }
 
 export default function RootLayout({
