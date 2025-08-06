@@ -17,6 +17,7 @@ import {
   Bell,
   BarChart3,
   DollarSign,
+  Pill,
 } from "lucide-react"
 import { appointmentService, doctorService } from "@/services/api"
 import type { Appointment } from "@/types"
@@ -166,7 +167,7 @@ export default function DoctorDashboard() {
 
           {/* Quick Actions */}
           <motion.div
-            className="grid grid-cols-2 md:grid-cols-4 gap-4"
+            className="grid grid-cols-2 md:grid-cols-5 gap-4"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
@@ -177,8 +178,8 @@ export default function DoctorDashboard() {
               whileHover={{ scale: 1.05, y: -2 }}
               whileTap={{ scale: 0.95 }}
             >
-              <Calendar className="w-6 h-6 mb-2" />
-              <span className="text-sm font-semibold">Calendar</span>
+              <Calendar className="w-6 h-6 mb-2 mx-auto" />
+              <span className="text-sm font-semibold block">Calendar</span>
             </motion.button>
             <motion.button
               onClick={() => router.push("/doctor/patients")}
@@ -186,8 +187,8 @@ export default function DoctorDashboard() {
               whileHover={{ scale: 1.05, y: -2 }}
               whileTap={{ scale: 0.95 }}
             >
-              <Users className="w-6 h-6 mb-2" />
-              <span className="text-sm font-semibold">Patients</span>
+              <Users className="w-6 h-6 mb-2 mx-auto" />
+              <span className="text-sm font-semibold block">Patients</span>
             </motion.button>
             <motion.button
               onClick={() => router.push("/doctor/consultations")}
@@ -195,17 +196,26 @@ export default function DoctorDashboard() {
               whileHover={{ scale: 1.05, y: -2 }}
               whileTap={{ scale: 0.95 }}
             >
-              <Stethoscope className="w-6 h-6 mb-2" />
-              <span className="text-sm font-semibold">Consultations</span>
+              <Stethoscope className="w-6 h-6 mb-2 mx-auto" />
+              <span className="text-sm font-semibold block">Consultations</span>
             </motion.button>
             <motion.button
-              onClick={() => router.push("/doctor/profile")}
-              className="p-4 bg-gradient-to-r from-orange-500 to-yellow-500 rounded-2xl text-white hover:shadow-2xl transition-all duration-300"
+              onClick={() => router.push("/doctor/prescriptions")}
+              className="p-4 bg-gradient-to-r from-orange-500 to-red-500 rounded-2xl text-white hover:shadow-2xl transition-all duration-300"
               whileHover={{ scale: 1.05, y: -2 }}
               whileTap={{ scale: 0.95 }}
             >
-              <User className="w-6 h-6 mb-2" />
-              <span className="text-sm font-semibold">Profile</span>
+              <Pill className="w-6 h-6 mb-2 mx-auto" />
+              <span className="text-sm font-semibold block">Prescriptions</span>
+            </motion.button>
+            <motion.button
+              onClick={() => router.push("/doctor/profile")}
+              className="p-4 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-2xl text-white hover:shadow-2xl transition-all duration-300"
+              whileHover={{ scale: 1.05, y: -2 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <User className="w-6 h-6 mb-2 mx-auto" />
+              <span className="text-sm font-semibold block">Profile</span>
             </motion.button>
           </motion.div>
         </div>

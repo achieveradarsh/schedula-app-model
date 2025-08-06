@@ -103,6 +103,29 @@ export default function BookAppointmentPage() {
     setUploadedFiles((prev) => prev.filter((_, i) => i !== index))
   }
 
+  const validateStep1 = () => {
+    const formData = watch()
+    if (!formData.patientName || !formData.patientPhone || !formData.consultationType) {
+      toast.error("Please fill in all required fields")
+      return false
+    }
+    
+    // Validate phone number format
+    if (!/^[0-9]{10}$/.test(formData.patientPhone)) {
+      toast.error("Please enter a valid 10-digit phone number")
+      return false
+    }
+    
+    return true
+  }
+
+  const handleStepNavigation = (nextStep: number) => {
+    if (nextStep === 2 && !validateStep1()) {
+      return
+    }
+    setCurrentStep(nextStep)
+  }
+
   const onSubmit = async (data: BookingForm) => {
     if (!doctor) return
 
@@ -185,10 +208,30 @@ export default function BookAppointmentPage() {
   }
 
   const steps = [
-    { step: 1, title: "Patient Details", completed: currentStep > 1 },
-    { step: 2, title: "Date & Time", completed: currentStep > 2 },
-    { step: 3, title: "Medical Documents", completed: currentStep > 3 },
-    { step: 4, title: "Payment", completed: false },
+    { 
+      id: 1, 
+      title: "Patient Details", 
+      completed: currentStep > 1,
+      icon: <User className="w-5 h-5" />
+    },
+    { 
+      id: 2, 
+      title: "Date & Time", 
+      completed: currentStep > 2,
+      icon: <Calendar className="w-5 h-5" />
+    },
+    { 
+      id: 3, 
+      title: "Medical Documents", 
+      completed: currentStep > 3,
+      icon: <FileText className="w-5 h-5" />
+    },
+    { 
+      id: 4, 
+      title: "Payment", 
+      completed: false,
+      icon: <CreditCard className="w-5 h-5" />
+    },
   ]
 
   return (
@@ -242,7 +285,7 @@ export default function BookAppointmentPage() {
           </Card>
 
           {/* Progress */}
-          <BookingProgress steps={steps} />
+          <BookingProgress currentStep={currentStep} steps={steps} />
         </div>
       </motion.div>
 
@@ -270,7 +313,7 @@ export default function BookAppointmentPage() {
 
                     <div className="space-y-6">
                       <Input
-                        label="Full Name"
+                        label="Full Name *"
                         placeholder="Enter patient's full name"
                         icon={<User className="w-5 h-5" />}
                         {...register("patientName", { required: "Patient name is required" })}
@@ -278,7 +321,7 @@ export default function BookAppointmentPage() {
                       />
 
                       <Input
-                        label="Phone Number"
+                        label="Phone Number *"
                         type="tel"
                         placeholder="Enter phone number"
                         icon={<Phone className="w-5 h-5" />}
@@ -294,11 +337,11 @@ export default function BookAppointmentPage() {
 
                       <div>
                         <label className="block text-sm font-semibold text-slate-700 mb-2">
-                          Describe your symptoms
+                          Describe your symptoms (optional)
                         </label>
                         <textarea
-                          {...register("symptoms", { required: "Please describe your symptoms" })}
-                          placeholder="Please describe your symptoms, concerns, or reason for consultation..."
+                          {...register("symptoms")}
+                          placeholder="Please describe your symptoms, concerns, or reason for consultation (optional)..."
                           rows={4}
                           className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-400 transition-all duration-300 text-slate-900 placeholder-slate-400 resize-none"
                         />
@@ -306,16 +349,22 @@ export default function BookAppointmentPage() {
                       </div>
 
                       <div>
-                        <label className="block text-sm font-semibold text-slate-700 mb-3">Consultation Type</label>
+                        <label className="block text-sm font-semibold text-slate-700 mb-3">
+                          Consultation Type *
+                        </label>
                         <div className="grid grid-cols-2 gap-4">
                           <label className="relative">
                             <input
                               type="radio"
                               value="offline"
                               {...register("consultationType", { required: "Please select consultation type" })}
-                              className="sr-only"
+                              className="sr-only peer"
                             />
-                            <div className="p-4 border-2 border-slate-200 rounded-xl cursor-pointer hover:border-indigo-300 transition-all duration-200 peer-checked:border-indigo-500 peer-checked:bg-indigo-50">
+                            <div className={`p-4 border-2 rounded-xl cursor-pointer transition-all duration-200 ${
+                              watch("consultationType") === "offline"
+                                ? "border-indigo-500 bg-indigo-50 ring-4 ring-indigo-500/20"
+                                : "border-slate-200 hover:border-indigo-300"
+                            }`}>
                               <div className="text-center">
                                 <div className="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center mx-auto mb-2">
                                   <User className="w-4 h-4 text-orange-600" />
@@ -330,9 +379,13 @@ export default function BookAppointmentPage() {
                               type="radio"
                               value="online"
                               {...register("consultationType", { required: "Please select consultation type" })}
-                              className="sr-only"
+                              className="sr-only peer"
                             />
-                            <div className="p-4 border-2 border-slate-200 rounded-xl cursor-pointer hover:border-indigo-300 transition-all duration-200 peer-checked:border-indigo-500 peer-checked:bg-indigo-50">
+                            <div className={`p-4 border-2 rounded-xl cursor-pointer transition-all duration-200 ${
+                              watch("consultationType") === "online"
+                                ? "border-indigo-500 bg-indigo-50 ring-4 ring-indigo-500/20"
+                                : "border-slate-200 hover:border-indigo-300"
+                            }`}>
                               <div className="text-center">
                                 <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-2">
                                   <Phone className="w-4 h-4 text-purple-600" />
@@ -350,7 +403,13 @@ export default function BookAppointmentPage() {
                     </div>
 
                     <div className="flex justify-end mt-8">
-                      <Button type="button" onClick={() => setCurrentStep(2)} variant="gradient" size="lg" glow>
+                      <Button 
+                        type="button" 
+                        onClick={() => handleStepNavigation(2)} 
+                        variant="gradient" 
+                        size="lg" 
+                        glow
+                      >
                         Continue to Date & Time →
                       </Button>
                     </div>
@@ -377,7 +436,7 @@ export default function BookAppointmentPage() {
 
                     <div className="space-y-6">
                       <Input
-                        label="Appointment Date"
+                        label="Appointment Date *"
                         type="date"
                         min={new Date().toISOString().split("T")[0]}
                         icon={<Calendar className="w-5 h-5" />}
@@ -388,7 +447,7 @@ export default function BookAppointmentPage() {
                       {availableSlots.length > 0 && (
                         <div>
                           <label className="block text-sm font-semibold text-slate-700 mb-3">
-                            Available Time Slots
+                            Available Time Slots *
                           </label>
                           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                             {availableSlots.map((slot) => (
@@ -397,11 +456,19 @@ export default function BookAppointmentPage() {
                                   type="radio"
                                   value={slot}
                                   {...register("timeSlot", { required: "Please select a time slot" })}
-                                  className="sr-only"
+                                  className="sr-only peer"
                                 />
-                                <div className="p-3 border-2 border-slate-200 rounded-xl cursor-pointer hover:border-emerald-300 transition-all duration-200 text-center peer-checked:border-emerald-500 peer-checked:bg-emerald-50">
-                                  <Clock className="w-4 h-4 mx-auto mb-1 text-slate-600" />
-                                  <p className="text-sm font-semibold text-slate-900">{slot}</p>
+                                <div className={`p-3 border-2 rounded-xl cursor-pointer transition-all duration-200 text-center ${
+                                  watch("timeSlot") === slot
+                                    ? "border-emerald-500 bg-emerald-50 ring-4 ring-emerald-500/20"
+                                    : "border-slate-200 hover:border-emerald-300"
+                                }`}>
+                                  <Clock className={`w-4 h-4 mx-auto mb-1 ${
+                                    watch("timeSlot") === slot ? "text-emerald-600" : "text-slate-600"
+                                  }`} />
+                                  <p className={`text-sm font-semibold ${
+                                    watch("timeSlot") === slot ? "text-emerald-900" : "text-slate-900"
+                                  }`}>{slot}</p>
                                 </div>
                               </label>
                             ))}

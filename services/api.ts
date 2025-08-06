@@ -1,5 +1,5 @@
 import axios from "axios"
-import type { Doctor, Appointment, User } from "@/types"
+import type { Doctor, Appointment, User, Prescription, Medicine } from "@/types"
 
 const API_BASE_URL = "http://localhost:4000"
 
@@ -253,7 +253,65 @@ const mockAppointments: Appointment[] = [
     paymentStatus: "completed",
     cancelReason: "Doctor had emergency surgery",
   },
+  // Rescheduled appointments
+  {
+    id: "apt7",
+    doctorId: "doctor1",
+    patientId: "patient1",
+    patientName: "Sarah Wilson",
+    patientPhone: "+91 9876543211",
+    date: getTomorrowDate(), // Tomorrow
+    timeSlot: "2:30 PM - 2:45 PM",
+    status: "rescheduled",
+    symptoms: "doctor tooltip checker",
+    consultationFee: 800,
+    consultationType: "offline",
+    tokenNumber: "T007",
+    createdAt: "2024-01-15T00:00:00Z",
+    updatedAt: new Date().toISOString(),
+    paymentStatus: "completed",
+    rescheduledBy: "patient",
+    rescheduledAt: "2024-01-15T14:30:00Z",
+    originalDate: "2024-01-15",
+    originalTimeSlot: "10:00 AM - 10:15 AM",
+    rescheduledCount: 1,
+  },
+  {
+    id: "apt8",
+    doctorId: "doctor2",
+    patientId: "patient1",
+    patientName: "Michael Brown",
+    patientPhone: "+91 9876543212",
+    date: getAfterTomorrowDate(), // Day after tomorrow
+    timeSlot: "11:00 AM - 11:15 AM",
+    status: "rescheduled",
+    symptoms: "Heart palpitations and anxiety symptoms",
+    consultationFee: 1200,
+    consultationType: "online",
+    tokenNumber: "T008",
+    createdAt: "2024-01-14T00:00:00Z",
+    updatedAt: new Date().toISOString(),
+    paymentStatus: "completed",
+    rescheduledBy: "doctor",
+    rescheduledAt: "2024-01-16T09:15:00Z",
+    originalDate: "2024-01-16",
+    originalTimeSlot: "9:00 AM - 9:15 AM",
+    rescheduledCount: 2,
+  },
 ]
+
+// Helper functions for dynamic dates
+function getTomorrowDate(): string {
+  const tomorrow = new Date()
+  tomorrow.setDate(tomorrow.getDate() + 1)
+  return tomorrow.toISOString().split("T")[0]
+}
+
+function getAfterTomorrowDate(): string {
+  const afterTomorrow = new Date()
+  afterTomorrow.setDate(afterTomorrow.getDate() + 2)
+  return afterTomorrow.toISOString().split("T")[0]
+}
 
 // FIXED: Proper API simulation with delays
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
@@ -559,45 +617,59 @@ export const appointmentService = {
     }
   },
 
-  // NEW: Reschedule appointment with date selection
-  rescheduleAppointment: async (appointmentId: string, newDate: string, newTimeSlot: string): Promise<void> => {
+  // ENHANCED: Reschedule appointment with comprehensive tracking
+  rescheduleAppointment: async (appointmentId: string, newDate: string, newTimeSlot: string, rescheduledBy: "doctor" | "patient" = "doctor"): Promise<void> => {
     await delay(1000)
 
     try {
       await api.patch(`/appointments/${appointmentId}`, {
         date: newDate,
         timeSlot: newTimeSlot,
-        status: "scheduled",
+        status: "rescheduled",
+        rescheduledBy,
+        rescheduledAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       })
     } catch (error) {
       console.warn("JSON Server not available, using localStorage:", error)
 
-      // Update mock appointments
+      // Update mock appointments with enhanced tracking
       const appointmentIndex = mockAppointments.findIndex((apt) => apt.id === appointmentId)
       if (appointmentIndex !== -1) {
+        const currentApt = mockAppointments[appointmentIndex]
         mockAppointments[appointmentIndex] = {
-          ...mockAppointments[appointmentIndex],
+          ...currentApt,
           date: newDate,
           timeSlot: newTimeSlot,
-          status: "scheduled",
+          status: "rescheduled",
+          rescheduledBy,
+          rescheduledAt: new Date().toISOString(),
+          originalDate: currentApt.originalDate || currentApt.date,
+          originalTimeSlot: currentApt.originalTimeSlot || currentApt.timeSlot,
+          rescheduledCount: (currentApt.rescheduledCount || 0) + 1,
           updatedAt: new Date().toISOString(),
         }
       }
 
-      // Update localStorage
+      // Update localStorage with enhanced tracking
       const existingAppointments = JSON.parse(localStorage.getItem("appointments") || "[]")
-      const updatedAppointments = existingAppointments.map((apt: Appointment) =>
-        apt.id === appointmentId
-          ? {
-              ...apt,
-              date: newDate,
-              timeSlot: newTimeSlot,
-              status: "scheduled",
-              updatedAt: new Date().toISOString(),
-            }
-          : apt,
-      )
+      const updatedAppointments = existingAppointments.map((apt: Appointment) => {
+        if (apt.id === appointmentId) {
+          return {
+            ...apt,
+            date: newDate,
+            timeSlot: newTimeSlot,
+            status: "rescheduled",
+            rescheduledBy,
+            rescheduledAt: new Date().toISOString(),
+            originalDate: apt.originalDate || apt.date,
+            originalTimeSlot: apt.originalTimeSlot || apt.timeSlot,
+            rescheduledCount: (apt.rescheduledCount || 0) + 1,
+            updatedAt: new Date().toISOString(),
+          }
+        }
+        return apt
+      })
       localStorage.setItem("appointments", JSON.stringify(updatedAppointments))
 
       // Dispatch real-time update event
@@ -653,6 +725,184 @@ export const appointmentService = {
       return allSlots.filter((slot) => !bookedSlots.includes(slot))
     }
   },
+}
+
+// PRESCRIPTION SERVICE
+export const prescriptionService = {
+  // Mock prescriptions data
+  mockPrescriptions: [
+    {
+      id: "rx1",
+      doctorId: "doctor1",
+      patientId: "patient1",
+      appointmentId: "apt1",
+      patientName: "John Patient",
+      patientPhone: "1234567890",
+      medicines: [
+        {
+          id: "med1",
+          name: "Paracetamol 500mg",
+          dosage: "1 tablet",
+          duration: "5 days",
+          frequency: "Twice a day",
+          notes: "After meals"
+        },
+        {
+          id: "med2",
+          name: "Amoxicillin 250mg",
+          dosage: "1 capsule",
+          duration: "7 days",
+          frequency: "Three times a day",
+          notes: "Complete the full course"
+        }
+      ],
+      diagnosis: "Common Cold with mild fever",
+      instructions: "Take plenty of rest, drink warm water, avoid cold foods",
+      status: "active" as const,
+      createdAt: "2024-12-15T10:00:00Z",
+      updatedAt: "2024-12-15T10:00:00Z",
+      appointmentDate: "2024-12-15",
+      followUpDate: "2024-12-22"
+    },
+    {
+      id: "rx2",
+      doctorId: "doctor1",
+      patientId: "patient2",
+      appointmentId: "apt2",
+      patientName: "Sarah Johnson",
+      patientPhone: "9876543210",
+      medicines: [
+        {
+          id: "med3",
+          name: "Ibuprofen 400mg",
+          dosage: "1 tablet",
+          duration: "3 days",
+          frequency: "Twice a day",
+          notes: "With food to avoid stomach upset"
+        }
+      ],
+      diagnosis: "Migraine headache",
+      instructions: "Avoid stress, maintain regular sleep schedule",
+      status: "completed" as const,
+      createdAt: "2024-12-10T14:30:00Z",
+      updatedAt: "2024-12-13T14:30:00Z",
+      appointmentDate: "2024-12-10"
+    }
+  ],
+
+  // Get all prescriptions for a doctor
+  getPrescriptions: async (doctorId: string): Promise<any[]> => {
+    await new Promise((resolve) => setTimeout(resolve, 500)) // Simulate API delay
+    
+    // Get from localStorage and mock data
+    const localPrescriptions = JSON.parse(localStorage.getItem("prescriptions") || "[]")
+    const allPrescriptions = [...prescriptionService.mockPrescriptions, ...localPrescriptions]
+    
+    return allPrescriptions
+      .filter((prescription: any) => prescription.doctorId === doctorId)
+      .sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+  },
+
+  // Get prescriptions for a specific patient
+  getPatientPrescriptions: async (patientId: string, doctorId: string): Promise<any[]> => {
+    await new Promise((resolve) => setTimeout(resolve, 300))
+    
+    const localPrescriptions = JSON.parse(localStorage.getItem("prescriptions") || "[]")
+    const allPrescriptions = [...prescriptionService.mockPrescriptions, ...localPrescriptions]
+    
+    return allPrescriptions.filter((prescription: any) => 
+      prescription.patientId === patientId && prescription.doctorId === doctorId
+    )
+  },
+
+  // Create new prescription
+  createPrescription: async (prescriptionData: any): Promise<any> => {
+    await new Promise((resolve) => setTimeout(resolve, 800))
+    
+    const newPrescription = {
+      id: `rx_${Date.now()}`,
+      ...prescriptionData,
+      status: "active",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    }
+
+    const localPrescriptions = JSON.parse(localStorage.getItem("prescriptions") || "[]")
+    const updatedPrescriptions = [...localPrescriptions, newPrescription]
+    localStorage.setItem("prescriptions", JSON.stringify(updatedPrescriptions))
+
+    return newPrescription
+  },
+
+  // Update prescription
+  updatePrescription: async (prescriptionId: string, updates: any): Promise<any> => {
+    await new Promise((resolve) => setTimeout(resolve, 600))
+    
+    const localPrescriptions = JSON.parse(localStorage.getItem("prescriptions") || "[]")
+    const allPrescriptions = [...prescriptionService.mockPrescriptions, ...localPrescriptions]
+    
+    const prescriptionIndex = allPrescriptions.findIndex((p: any) => p.id === prescriptionId)
+    if (prescriptionIndex === -1) {
+      throw new Error("Prescription not found")
+    }
+
+    const updatedPrescription = {
+      ...allPrescriptions[prescriptionIndex],
+      ...updates,
+      updatedAt: new Date().toISOString(),
+    }
+
+    // Only update if it's in localStorage (not mock data)
+    const localIndex = localPrescriptions.findIndex((p: any) => p.id === prescriptionId)
+    if (localIndex !== -1) {
+      localPrescriptions[localIndex] = updatedPrescription
+      localStorage.setItem("prescriptions", JSON.stringify(localPrescriptions))
+    }
+
+    return updatedPrescription
+  },
+
+  // Delete prescription
+  deletePrescription: async (prescriptionId: string): Promise<void> => {
+    await new Promise((resolve) => setTimeout(resolve, 400))
+    
+    const localPrescriptions = JSON.parse(localStorage.getItem("prescriptions") || "[]")
+    const filteredPrescriptions = localPrescriptions.filter((p: any) => p.id !== prescriptionId)
+    localStorage.setItem("prescriptions", JSON.stringify(filteredPrescriptions))
+  },
+
+  // Search prescriptions
+  searchPrescriptions: async (doctorId: string, query: string): Promise<any[]> => {
+    await new Promise((resolve) => setTimeout(resolve, 300))
+    
+    const allPrescriptions = await prescriptionService.getPrescriptions(doctorId)
+    
+    if (!query.trim()) return allPrescriptions
+
+    const searchTerm = query.toLowerCase()
+    return allPrescriptions.filter((prescription: any) => 
+      prescription.patientName.toLowerCase().includes(searchTerm) ||
+      prescription.diagnosis?.toLowerCase().includes(searchTerm) ||
+      prescription.medicines.some((med: any) => 
+        med.name.toLowerCase().includes(searchTerm)
+      )
+    )
+  },
+
+  // Get prescription by ID
+  getPrescriptionById: async (prescriptionId: string): Promise<any> => {
+    await new Promise((resolve) => setTimeout(resolve, 300))
+    
+    const localPrescriptions = JSON.parse(localStorage.getItem("prescriptions") || "[]")
+    const allPrescriptions = [...prescriptionService.mockPrescriptions, ...localPrescriptions]
+    
+    const prescription = allPrescriptions.find((p: any) => p.id === prescriptionId)
+    if (!prescription) {
+      throw new Error("Prescription not found")
+    }
+    
+    return prescription
+  }
 }
 
 export default api

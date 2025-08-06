@@ -60,7 +60,7 @@ export interface Appointment {
   patientPhone: string
   date: string
   timeSlot: string
-  status: "scheduled" | "completed" | "cancelled"
+  status: "scheduled" | "completed" | "cancelled" | "rescheduled"
   symptoms: string
   consultationFee: number
   consultationType: "online" | "offline"
@@ -72,6 +72,11 @@ export interface Appointment {
   prescription?: string
   createdAt?: string
   updatedAt?: string
+  rescheduledBy?: "doctor" | "patient"
+  rescheduledAt?: string
+  originalDate?: string
+  originalTimeSlot?: string
+  rescheduledCount?: number
 }
 
 export interface AppointmentForm {
@@ -117,4 +122,37 @@ export interface Notification {
   type: "appointment" | "reminder" | "system"
   read: boolean
   createdAt: string
+}
+
+export interface Medicine {
+  id: string
+  name: string
+  dosage: string
+  duration: string
+  frequency: string
+  notes?: string
+}
+
+export interface Prescription {
+  id: string
+  doctorId: string
+  patientId: string
+  appointmentId: string
+  patientName: string
+  patientPhone: string
+  medicines: Medicine[]
+  diagnosis?: string
+  instructions?: string
+  status: "active" | "completed" | "cancelled"
+  createdAt: string
+  updatedAt: string
+  appointmentDate: string
+  followUpDate?: string
+}
+
+export interface PrescriptionForm {
+  medicines: Medicine[]
+  diagnosis: string
+  instructions: string
+  followUpDate?: string
 }

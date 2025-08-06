@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
+import Link from "next/link"
 import { motion, AnimatePresence } from "framer-motion"
 import {
   Stethoscope,
@@ -286,12 +287,17 @@ export default function ConsultationsPage() {
                           )}
 
                           {/* Action Buttons */}
-                          <div className="flex items-center space-x-3">
+                          <div className="flex items-center space-x-3 flex-wrap gap-y-2">
                             <Button size="sm" variant="secondary" icon={<Eye className="w-4 h-4" />}>
                               View Details
                             </Button>
                             {consultation.status === "completed" && (
                               <>
+                                <Link href={`/doctor/prescriptions/create?appointmentId=${consultation.id}&patientId=${consultation.patientId}`}>
+                                  <Button size="sm" variant="gradient" icon={<Edit3 className="w-4 h-4 bg-transparent" />}>
+                                    Create Prescription
+                                  </Button>
+                                </Link>
                                 <Button size="sm" variant="outline" icon={<Edit3 className="w-4 h-4 bg-transparent" />}>
                                   Edit Notes
                                 </Button>

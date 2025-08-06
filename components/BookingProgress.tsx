@@ -38,12 +38,12 @@ export const BookingProgress: React.FC<BookingProgressProps> = ({ currentStep, s
             transition={{ delay: index * 0.1 }}
           >
             <motion.div
-              className={`w-12 h-12 rounded-full flex items-center justify-center border-4 transition-all duration-300 ${
+              className={`w-12 h-12 rounded-full flex items-center justify-center border-4 transition-all duration-300 relative ${
                 step.completed
-                  ? "bg-gradient-to-r from-emerald-500 to-teal-500 border-emerald-500 text-white"
+                  ? "bg-gradient-to-r from-emerald-500 to-teal-500 border-emerald-500 text-white shadow-lg"
                   : currentStep === step.id
-                    ? "bg-gradient-to-r from-indigo-500 to-purple-500 border-indigo-500 text-white"
-                    : "bg-white border-slate-300 text-slate-400"
+                    ? "bg-gradient-to-r from-indigo-500 to-purple-500 border-indigo-500 text-white shadow-lg"
+                    : "bg-white border-slate-300 text-slate-600 shadow-md"
               }`}
               whileHover={{ scale: 1.1 }}
               animate={
@@ -59,7 +59,17 @@ export const BookingProgress: React.FC<BookingProgressProps> = ({ currentStep, s
               }
               transition={{ duration: 1.5, repeat: currentStep === step.id ? Number.POSITIVE_INFINITY : 0 }}
             >
-              {step.completed ? <Check className="w-5 h-5" /> : step.icon}
+              <div className="flex items-center justify-center w-full h-full">
+                {step.completed ? (
+                  <Check className="w-5 h-5 font-bold" />
+                ) : (
+                  <div className={`flex items-center justify-center ${
+                    currentStep === step.id ? "text-white" : "text-slate-600"
+                  }`}>
+                    {step.icon}
+                  </div>
+                )}
+              </div>
             </motion.div>
             <motion.p
               className={`mt-2 text-xs font-medium text-center ${

@@ -77,3 +77,34 @@
   animation: gradient-x 15s ease infinite;
   background-size: 200% 200%;
 }
+
+/* Z-index management for modal overlays */
+@layer utilities {
+  .modal-overlay {
+    z-index: 1100 !important;
+  }
+  
+  .tooltip-overlay {
+    z-index: 999 !important;
+  }
+  
+  .calendar-tooltip {
+    z-index: 999 !important;
+    pointer-events: none;
+  }
+}
+
+/* Ensure modals are always on top of tooltips */
+[data-state="open"][role="dialog"] {
+  z-index: 1100 !important;
+}
+
+/* Custom tooltip positioning */
+.rbc-tooltip {
+  z-index: 999 !important;
+}
+
+/* Hide any conflicting tooltips when modal is open */
+.modal-open .rbc-tooltip {
+  display: none !important;
+}
