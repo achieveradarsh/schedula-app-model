@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react"
 import { useRouter } from "next/navigation"
+import Link from "next/link"
 import { motion, AnimatePresence } from "framer-motion"
 import { Calendar as BigCalendar, momentLocalizer, Views, type View } from "react-big-calendar"
 import { DndProvider } from "react-dnd"
@@ -11,7 +12,7 @@ import moment from "moment"
 import { 
   ArrowLeft, Plus, Filter, Clock, User, Video, MapPin, XCircle, CheckCircle, 
   Calendar as CalendarIcon, Phone, Stethoscope, RotateCcw, AlertCircle,
-  ChevronDown, Badge
+  ChevronDown, Badge, Pill, FileText, Edit3
 } from "lucide-react"
 import { appointmentService } from "@/services/api"
 import type { Appointment } from "@/types"
@@ -958,6 +959,35 @@ export default function DoctorCalendarPage() {
                       Join Call
                     </Button>
                   )}
+                {selectedEvent.resource.status === "completed" && (
+                  <>
+                    <Link href={`/doctor/prescriptions/create?appointmentId=${selectedEvent.resource.id}&patientId=${selectedEvent.resource.patientId}`}>
+                      <Button
+                        size="sm"
+                        variant="gradient"
+                        icon={<Pill className="w-4 h-4" />}
+                      >
+                        Create Prescription
+                      </Button>
+                    </Link>
+                    <Link href="/doctor/prescriptions">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        icon={<FileText className="w-4 h-4" />}
+                      >
+                        View Prescriptions
+                      </Button>
+                    </Link>
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      icon={<Edit3 className="w-4 h-4" />}
+                    >
+                      Add Notes
+                    </Button>
+                  </>
+                )}
               </div>
             </motion.div>
           </div>

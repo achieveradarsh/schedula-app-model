@@ -21,7 +21,8 @@ import {
   CheckCircle,
   XCircle,
   Download,
-  MoreVertical
+  MoreVertical,
+  ArrowLeft
 } from "lucide-react"
 import { Button } from "@/components/ui/Button"
 import { Card } from "@/components/ui/Card"
@@ -193,6 +194,17 @@ export default function PrescriptionsPage() {
         animate={{ opacity: 1, y: 0 }}
       >
         <div className="px-6 py-8">
+          <div className="flex items-center space-x-4 mb-6">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => router.push("/doctor/dashboard")}
+              icon={<ArrowLeft className="w-4 h-4" />}
+              className="hover:bg-slate-100 text-slate-700"
+            >
+              Back to Dashboard
+            </Button>
+          </div>
           <div className="flex items-center justify-between mb-6">
             <div>
               <h1 className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
