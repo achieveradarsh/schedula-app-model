@@ -251,7 +251,7 @@ export default function LoginPage() {
                     <p className="text-slate-300">📱 9876543210 (OTP: any)</p>
                   </div>
                   <div>
-                    <p className="text-pink-400 font-medium">Dr. Priya Sharma</p>
+                    <p className="text-pink-400 font-medium">Dr. Priya Sharma (Recommended)</p>
                     <p className="text-slate-300">📧 priya.sharma@schedula.com</p>
                     <p className="text-slate-300">🔒 password</p>
                     <p className="text-slate-300">📱 9876543215 (OTP: any)</p>

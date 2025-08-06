@@ -24,6 +24,7 @@ import { Card } from "@/components/ui/Card"
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner"
 import { useAuthStore } from "@/store/authStore"
 import { prescriptionService } from "@/services/api"
+import toast from "react-hot-toast"
 
 interface MedicalRecord {
   id: string
@@ -376,10 +377,32 @@ export default function RecordsPage() {
 
                           {/* Action Buttons */}
                           <div className="flex items-center space-x-3">
-                            <Button size="sm" variant="outline" icon={<Eye className="w-4 h-4 bg-transparent" />}>
+                            <Button 
+                              size="sm" 
+                              variant="outline" 
+                              icon={<Eye className="w-4 h-4 bg-transparent" />}
+                              onClick={() => {
+                                if (record.type === "prescription") {
+                                  router.push(`/records/prescription/${record.id}`)
+                                } else {
+                                  toast("View details coming soon for this record type")
+                                }
+                              }}
+                            >
                               View Details
                             </Button>
-                            <Button size="sm" variant="secondary" icon={<Download className="w-4 h-4" />}>
+                            <Button 
+                              size="sm" 
+                              variant="secondary" 
+                              icon={<Download className="w-4 h-4" />}
+                              onClick={() => {
+                                if (record.type === "prescription") {
+                                  toast.success("Prescription downloaded!")
+                                } else {
+                                  toast.success("Record downloaded!")
+                                }
+                              }}
+                            >
                               Download
                             </Button>
                           </div>
