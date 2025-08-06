@@ -738,6 +738,7 @@ export const prescriptionService = {
       appointmentId: "apt1",
       patientName: "John Patient",
       patientPhone: "1234567890",
+      doctorName: "Adarsh Babu",
       medicines: [
         {
           id: "med1",
@@ -771,6 +772,7 @@ export const prescriptionService = {
       appointmentId: "apt2",
       patientName: "Sarah Johnson",
       patientPhone: "9876543210",
+      doctorName: "Priya Sharma",
       medicines: [
         {
           id: "med3",
@@ -813,6 +815,18 @@ export const prescriptionService = {
     return allPrescriptions.filter((prescription: any) => 
       prescription.patientId === patientId && prescription.doctorId === doctorId
     )
+  },
+
+  // Get all prescriptions for a patient (from all doctors)
+  getAllPatientPrescriptions: async (patientId: string): Promise<any[]> => {
+    await new Promise((resolve) => setTimeout(resolve, 300))
+    
+    const localPrescriptions = JSON.parse(localStorage.getItem("prescriptions") || "[]")
+    const allPrescriptions = [...prescriptionService.mockPrescriptions, ...localPrescriptions]
+    
+    return allPrescriptions
+      .filter((prescription: any) => prescription.patientId === patientId)
+      .sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
   },
 
   // Create new prescription

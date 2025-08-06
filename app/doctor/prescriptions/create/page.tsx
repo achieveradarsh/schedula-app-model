@@ -153,6 +153,7 @@ export default function CreatePrescriptionPage() {
       const prescriptionData = {
         ...data,
         doctorId: user!.id,
+        doctorName: user!.name,
         medicines: medicinesWithIds
       }
 

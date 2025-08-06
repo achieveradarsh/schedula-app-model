@@ -23,6 +23,7 @@ import { Button } from "@/components/ui/Button"
 import { Card } from "@/components/ui/Card"
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner"
 import { useAuthStore } from "@/store/authStore"
+import { prescriptionService } from "@/services/api"
 
 interface MedicalRecord {
   id: string
@@ -103,18 +104,47 @@ export default function RecordsPage() {
   useEffect(() => {
     const fetchRecords = async () => {
       try {
-        // Simulate API call
-        await new Promise((resolve) => setTimeout(resolve, 1000))
-        setRecords(mockRecords)
+        // Fetch mock records (consultations, lab reports, vaccinations, imaging)
+        const mockMedicalRecords = mockRecords.filter(record => record.type !== "prescription")
+        
+        // Fetch real prescriptions if user is logged in
+        let prescriptionRecords: MedicalRecord[] = []
+        if (user?.id) {
+          try {
+            const prescriptions = await prescriptionService.getAllPatientPrescriptions(user.id)
+            prescriptionRecords = prescriptions.map((prescription: any) => ({
+              id: prescription.id,
+              type: "prescription" as const,
+              title: `Prescription - ${prescription.diagnosis || 'Medical Prescription'}`,
+              doctorName: `Dr. ${prescription.doctorName || 'Doctor'}`, // You might need to add doctorName to prescription data
+              date: prescription.createdAt ? new Date(prescription.createdAt).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+              description: `${prescription.medicines?.length || 0} medicine(s) prescribed${prescription.diagnosis ? ' for ' + prescription.diagnosis : ''}`,
+              status: prescription.status || "completed" as const,
+            }))
+          } catch (error) {
+            console.error("Failed to fetch prescriptions:", error)
+            // Include mock prescription if real fetch fails
+            prescriptionRecords = mockRecords.filter(record => record.type === "prescription")
+          }
+        } else {
+          // Include mock prescription for demo purposes when not logged in
+          prescriptionRecords = mockRecords.filter(record => record.type === "prescription")
+        }
+        
+        // Combine all records
+        const allRecords = [...mockMedicalRecords, ...prescriptionRecords]
+        setRecords(allRecords)
       } catch (error) {
         console.error("Failed to fetch records:", error)
+        // Fallback to mock data
+        setRecords(mockRecords)
       } finally {
         setLoading(false)
       }
     }
 
     fetchRecords()
-  }, [])
+  }, [user])
 
   const filteredRecords = records.filter((record) => {
     const matchesSearch =

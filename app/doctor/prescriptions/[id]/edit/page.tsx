@@ -109,6 +109,7 @@ export default function EditPrescriptionPage() {
 
       const updates = {
         ...data,
+        doctorName: user!.name,
         medicines: data.medicines.map((medicine, index) => ({
           ...medicine,
           id: medicine.id || `med_${Date.now()}_${index}`
