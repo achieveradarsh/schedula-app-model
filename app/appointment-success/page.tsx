@@ -5,10 +5,11 @@ import { motion } from "framer-motion"
 import { CheckCircle, Download, Calendar, Clock, User, CreditCard, Share, Home } from "lucide-react"
 import { Button } from "@/components/ui/Button"
 import { Card } from "@/components/ui/Card"
-import { useEffect, useState } from "react"
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner"
+import { useEffect, useState, Suspense } from "react"
 import toast from "react-hot-toast"
 
-export default function AppointmentSuccessPage() {
+function AppointmentSuccessContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [showConfetti, setShowConfetti] = useState(true)
@@ -265,5 +266,17 @@ export default function AppointmentSuccessPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function AppointmentSuccessPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 flex items-center justify-center">
+        <LoadingSpinner size="xl" text="Loading..." variant="gradient" />
+      </div>
+    }>
+      <AppointmentSuccessContent />
+    </Suspense>
   )
 }

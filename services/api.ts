@@ -1,5 +1,6 @@
 import axios from "axios"
-import type { Doctor, Appointment, User, Prescription, Medicine } from "@/types"
+import type { User, Appointment, Doctor, Medicine, Prescription } from "@/types"
+import { storage } from "@/lib/storage"
 
 const API_BASE_URL = "http://localhost:4000"
 
@@ -797,7 +798,7 @@ export const prescriptionService = {
     await new Promise((resolve) => setTimeout(resolve, 500)) // Simulate API delay
     
     // Get from localStorage and mock data
-    const localPrescriptions = JSON.parse(localStorage.getItem("prescriptions") || "[]")
+    const localPrescriptions = JSON.parse(storage.get("prescriptions", "[]"))
     const allPrescriptions = [...prescriptionService.mockPrescriptions, ...localPrescriptions]
     
     return allPrescriptions
@@ -841,9 +842,9 @@ export const prescriptionService = {
       updatedAt: new Date().toISOString(),
     }
 
-    const localPrescriptions = JSON.parse(localStorage.getItem("prescriptions") || "[]")
+    const localPrescriptions = JSON.parse(storage.get("prescriptions", "[]"))
     const updatedPrescriptions = [...localPrescriptions, newPrescription]
-    localStorage.setItem("prescriptions", JSON.stringify(updatedPrescriptions))
+    storage.set("prescriptions", JSON.stringify(updatedPrescriptions))
 
     return newPrescription
   },

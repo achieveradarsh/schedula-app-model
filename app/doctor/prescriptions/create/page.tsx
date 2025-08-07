@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState, useEffect } from "react"
+import { useState, useEffect, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import { 
@@ -42,7 +42,7 @@ interface PrescriptionForm {
   followUpDate?: string
 }
 
-export default function CreatePrescriptionPage() {
+function CreatePrescriptionContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { user } = useAuthStore()
@@ -499,5 +499,17 @@ export default function CreatePrescriptionPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function CreatePrescriptionPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 flex items-center justify-center">
+        <LoadingSpinner size="xl" text="Loading..." variant="gradient" />
+      </div>
+    }>
+      <CreatePrescriptionContent />
+    </Suspense>
   )
 }
