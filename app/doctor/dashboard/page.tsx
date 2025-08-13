@@ -18,6 +18,8 @@ import {
   BarChart3,
   DollarSign,
   Pill,
+  MessageSquare,
+  FileText,
 } from "lucide-react"
 import { appointmentService, doctorService } from "@/services/api"
 import type { Appointment } from "@/types"
@@ -167,7 +169,7 @@ export default function DoctorDashboard() {
 
           {/* Quick Actions */}
           <motion.div
-            className="grid grid-cols-2 md:grid-cols-5 gap-4"
+            className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
@@ -207,6 +209,25 @@ export default function DoctorDashboard() {
             >
               <Pill className="w-6 h-6 mb-2 mx-auto" />
               <span className="text-sm font-semibold block">Prescriptions</span>
+            </motion.button>
+            <motion.button
+              onClick={() => router.push("/doctor/reviews")}
+              className="p-4 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-2xl text-white hover:shadow-2xl transition-all duration-300"
+              whileHover={{ scale: 1.05, y: -2 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <MessageSquare className="w-6 h-6 mb-2 mx-auto" />
+              <span className="text-sm font-semibold block">Reviews</span>
+            </motion.button>
+            <motion.button
+              onClick={() => router.push("/doctor/patients")}
+              className="p-4 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-2xl text-white hover:shadow-2xl transition-all duration-300"
+              whileHover={{ scale: 1.05, y: -2 }}
+              whileTap={{ scale: 0.95 }}
+              title="View Patient Medical Histories"
+            >
+              <FileText className="w-6 h-6 mb-2 mx-auto" />
+              <span className="text-sm font-semibold block">Medical History</span>
             </motion.button>
             <motion.button
               onClick={() => router.push("/doctor/profile")}

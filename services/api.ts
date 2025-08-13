@@ -726,6 +726,26 @@ export const appointmentService = {
       return allSlots.filter((slot) => !bookedSlots.includes(slot))
     }
   },
+
+  getAppointmentById: async (appointmentId: string): Promise<Appointment> => {
+    await delay(400)
+
+    try {
+      const response = await api.get(`/appointments/${appointmentId}`)
+      return response.data
+    } catch (error) {
+      console.warn("JSON Server not available, using localStorage:", error)
+      const localAppointments = JSON.parse(localStorage.getItem("appointments") || "[]")
+      const allAppointments = [...mockAppointments, ...localAppointments]
+      
+      const appointment = allAppointments.find((apt: Appointment) => apt.id === appointmentId)
+      if (!appointment) {
+        throw new Error("Appointment not found")
+      }
+      
+      return appointment
+    }
+  },
 }
 
 // PRESCRIPTION SERVICE
@@ -919,5 +939,272 @@ export const prescriptionService = {
     return prescription
   }
 }
+
+// Review Service Functions
+export const reviewService = {
+  // Submit a new review
+  submitReview: async (reviewData: {
+    appointmentId: string;
+    patientId: string;
+    doctorId: string;
+    rating: number;
+    comment: string;
+  }) => {
+    try {
+      const reviews = JSON.parse(storage.get("reviews", "[]"));
+      
+      // Check if review already exists for this appointment
+      const existingReview = reviews.find((review: any) => 
+        review.appointmentId === reviewData.appointmentId && 
+        review.patientId === reviewData.patientId
+      );
+      
+      if (existingReview) {
+        throw new Error("Review already exists for this appointment");
+      }
+
+      // Get appointment details to get names and date
+      const appointments = JSON.parse(localStorage.getItem("appointments") || "[]");
+      const appointment = appointments.find((app: any) => app.id === reviewData.appointmentId);
+      
+      // Get user details
+      const patientName = appointment?.patientName || "Patient";
+      const doctorName = appointment?.doctor?.name || "Doctor";
+      const appointmentDate = appointment?.date || new Date().toISOString();
+      
+      const newReview = {
+        id: `review_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        appointmentId: reviewData.appointmentId,
+        patientId: reviewData.patientId,
+        doctorId: reviewData.doctorId,
+        patientName,
+        doctorName,
+        rating: reviewData.rating,
+        reviewText: reviewData.comment,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        appointmentDate,
+        canEdit: true // Allow editing for 24 hours
+      };
+      
+      reviews.push(newReview);
+      storage.set("reviews", JSON.stringify(reviews));
+      
+      return { success: true, review: newReview };
+    } catch (error) {
+      console.error("Error submitting review:", error);
+      throw error;
+    }
+  },
+
+  // Get reviews for a doctor
+  getDoctorReviews: async (doctorId: string) => {
+    try {
+      const reviews = JSON.parse(storage.get("reviews", "[]"));
+      const doctorReviews = reviews.filter((review: any) => review.doctorId === doctorId);
+      
+      // Sort by newest first
+      doctorReviews.sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      
+      return { success: true, reviews: doctorReviews };
+    } catch (error) {
+      console.error("Error getting doctor reviews:", error);
+      return { success: false, reviews: [] };
+    }
+  },
+
+  // Get review statistics for a doctor
+  getDoctorReviewStats: async (doctorId: string) => {
+    try {
+      const reviews = JSON.parse(storage.get("reviews", "[]"));
+      const doctorReviews = reviews.filter((review: any) => review.doctorId === doctorId);
+      
+      if (doctorReviews.length === 0) {
+        return {
+          success: true,
+          stats: {
+            doctorId,
+            totalReviews: 0,
+            averageRating: 0,
+            ratingDistribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 },
+            ratingPercentages: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }
+          }
+        };
+      }
+      
+      const totalReviews = doctorReviews.length;
+      const averageRating = doctorReviews.reduce((sum: number, review: any) => sum + review.rating, 0) / totalReviews;
+      
+      const ratingDistribution = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+      doctorReviews.forEach((review: any) => {
+        ratingDistribution[review.rating as keyof typeof ratingDistribution]++;
+      });
+      
+      const ratingPercentages = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+      Object.keys(ratingDistribution).forEach((key) => {
+        const rating = parseInt(key) as keyof typeof ratingDistribution;
+        ratingPercentages[rating] = totalReviews > 0 ? Math.round((ratingDistribution[rating] / totalReviews) * 100) : 0;
+      });
+      
+      return {
+        success: true,
+        stats: {
+          doctorId,
+          totalReviews,
+          averageRating: Math.round(averageRating * 10) / 10,
+          ratingDistribution,
+          ratingPercentages
+        }
+      };
+    } catch (error) {
+      console.error("Error getting doctor review stats:", error);
+      return { success: false, stats: null };
+    }
+  },
+
+  // Update a review (within 24 hours)
+  updateReview: async (reviewId: string, updateData: { rating: number; comment: string }) => {
+    try {
+      const reviews = JSON.parse(storage.get("reviews", "[]"));
+      const reviewIndex = reviews.findIndex((review: any) => review.id === reviewId);
+      
+      if (reviewIndex === -1) {
+        throw new Error("Review not found");
+      }
+      
+      const review = reviews[reviewIndex];
+      const reviewAge = Date.now() - new Date(review.createdAt).getTime();
+      const twentyFourHours = 24 * 60 * 60 * 1000;
+      
+      if (reviewAge > twentyFourHours) {
+        throw new Error("Review can only be edited within 24 hours");
+      }
+      
+      reviews[reviewIndex] = {
+        ...review,
+        rating: updateData.rating,
+        reviewText: updateData.comment,
+        updatedAt: new Date().toISOString()
+      };
+      
+      storage.set("reviews", JSON.stringify(reviews));
+      
+      return { success: true, review: reviews[reviewIndex] };
+    } catch (error) {
+      console.error("Error updating review:", error);
+      throw error;
+    }
+  },
+
+  // Delete a review
+  deleteReview: async (reviewId: string) => {
+    try {
+      const reviews = JSON.parse(storage.get("reviews", "[]"));
+      const filteredReviews = reviews.filter((review: any) => review.id !== reviewId);
+      
+      storage.set("reviews", JSON.stringify(filteredReviews));
+      
+      return { success: true };
+    } catch (error) {
+      console.error("Error deleting review:", error);
+      throw error;
+    }
+  }
+};
+
+// Medical History Service Functions
+export const medicalHistoryService = {
+  // Get medical history for a patient
+  getPatientMedicalHistory: async (patientId: string, startDate?: string, endDate?: string) => {
+    try {
+      const appointments = JSON.parse(localStorage.getItem("appointments") || "[]");
+      const prescriptions = JSON.parse(storage.get("prescriptions", "[]"));
+      
+      // Filter appointments for this patient
+      const patientAppointments = appointments.filter((appointment: any) => 
+        appointment.patientId === patientId && appointment.status === 'completed'
+      );
+
+      // Get patient details from the first appointment
+      const firstAppointment = patientAppointments[0];
+      if (!firstAppointment) {
+        return {
+          success: true,
+          medicalHistory: {
+            patientId,
+            patientName: "Unknown Patient",
+            patientPhone: "",
+            patientEmail: "",
+            totalAppointments: 0,
+            totalPrescriptions: 0,
+            appointments: []
+          }
+        };
+      }
+
+      // Create appointment history items
+      const appointmentHistory: any[] = patientAppointments.map((appointment: any) => ({
+        id: appointment.id,
+        date: appointment.date,
+        timeSlot: appointment.timeSlot,
+        doctorName: appointment.doctor?.name || 'Doctor',
+        doctorSpecialization: appointment.doctor?.specialization || '',
+        symptoms: appointment.symptoms || '',
+        diagnosis: appointment.diagnosis || 'General consultation',
+        prescription: appointment.prescription || '',
+        notes: appointment.notes || '',
+        status: appointment.status,
+        followUpDate: appointment.followUpDate || null,
+        consultationFee: appointment.consultationFee || 0
+      }));
+
+      // Sort by date (newest first)
+      appointmentHistory.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+      // Apply date filtering if provided
+      let filteredHistory = appointmentHistory;
+      if (startDate && endDate) {
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+        filteredHistory = appointmentHistory.filter(appointment => {
+          const appointmentDate = new Date(appointment.date);
+          return appointmentDate >= start && appointmentDate <= end;
+        });
+      }
+
+      const medicalHistory = {
+        patientId,
+        patientName: firstAppointment.patientName || "Unknown Patient",
+        patientPhone: firstAppointment.patientPhone || "",
+        patientEmail: firstAppointment.patientEmail || "",
+        totalAppointments: patientAppointments.length,
+        totalPrescriptions: prescriptions.filter((p: any) => p.patientId === patientId).length,
+        appointments: filteredHistory.map((appointment: any) => ({
+          id: appointment.id,
+          date: appointment.date,
+          doctorName: appointment.doctorName,
+          doctorId: appointment.doctorId || firstAppointment.doctorId,
+          status: appointment.status,
+          consultationType: appointment.consultationType || 'in-person',
+          diagnosis: appointment.diagnosis,
+          prescription: appointment.prescription ? {
+            id: `pres_${appointment.id}`,
+            medicines: [],
+            instructions: appointment.prescription
+          } : undefined
+        })),
+        dateRange: startDate && endDate ? { startDate, endDate } : undefined
+      };
+
+      return {
+        success: true,
+        medicalHistory
+      };
+    } catch (error) {
+      console.error("Error getting medical history:", error);
+      return { success: false, medicalHistory: null };
+    }
+  }
+};
 
 export default api

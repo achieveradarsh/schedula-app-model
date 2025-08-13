@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
-import { Calendar, Clock, User, Phone, MapPin, Video, XCircle, RotateCcw, Download, Search, LogOut } from "lucide-react"
+import { Calendar, Clock, User, Phone, MapPin, Video, XCircle, RotateCcw, Download, Search, LogOut, Star } from "lucide-react"
 import { appointmentService, doctorService } from "@/services/api"
 import type { Appointment, Doctor } from "@/types"
 import { Button } from "@/components/ui/Button"
@@ -447,9 +447,19 @@ export default function AppointmentsPage() {
                               </>
                             )}
                             {appointment.status === "completed" && (
-                              <Button size="sm" variant="secondary" icon={<Download className="w-4 h-4" />}>
-                                Download Receipt
-                              </Button>
+                              <>
+                                <Button 
+                                  size="sm" 
+                                  variant="gradient" 
+                                  icon={<Star className="w-4 h-4" />}
+                                  onClick={() => router.push(`/appointments/${appointment.id}/review`)}
+                                >
+                                  Submit Review
+                                </Button>
+                                <Button size="sm" variant="secondary" icon={<Download className="w-4 h-4" />}>
+                                  Download Receipt
+                                </Button>
+                              </>
                             )}
                             {appointment.consultationType === "online" && appointment.status === "scheduled" && (
                               <Button size="sm" variant="success" icon={<Video className="w-4 h-4" />}>

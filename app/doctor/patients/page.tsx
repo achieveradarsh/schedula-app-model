@@ -133,6 +133,17 @@ export default function PatientsPage() {
                 <p className="text-slate-600 text-lg mt-1">Manage your patient relationships</p>
               </div>
             </div>
+            <div className="flex items-center space-x-3">
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => router.push("/doctor/reviews")}
+                icon={<MessageCircle className="w-4 h-4" />}
+                className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white hover:shadow-lg"
+              >
+                View Reviews
+              </Button>
+            </div>
           </div>
 
           {/* Search Bar */}
@@ -283,8 +294,13 @@ export default function PatientsPage() {
                     )}
 
                     <div className="flex items-center space-x-2">
-                      <Button size="sm" variant="secondary" icon={<Eye className="w-4 h-4" />}>
-                        View History
+                      <Button 
+                        size="sm" 
+                        variant="secondary" 
+                        icon={<FileText className="w-4 h-4" />}
+                        onClick={() => router.push(`/doctor/patients/${patient.id}/medical-history`)}
+                      >
+                        Medical History
                       </Button>
                       <Button size="sm" variant="outline" icon={<MessageCircle className="w-4 h-4 bg-transparent" />}>
                         Message

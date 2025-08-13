@@ -156,3 +156,73 @@ export interface PrescriptionForm {
   instructions: string
   followUpDate?: string
 }
+
+export interface Review {
+  id: string
+  appointmentId: string
+  patientId: string
+  doctorId: string
+  patientName: string
+  doctorName: string
+  rating: number // 1-5 stars
+  reviewText: string
+  createdAt: string
+  updatedAt: string
+  appointmentDate: string
+  canEdit: boolean // true if within 24 hours
+}
+
+export interface ReviewForm {
+  appointmentId: string
+  rating: number
+  reviewText: string
+}
+
+export interface DoctorReviewStats {
+  doctorId: string
+  totalReviews: number
+  averageRating: number
+  ratingDistribution: {
+    1: number
+    2: number
+    3: number
+    4: number
+    5: number
+  }
+  ratingPercentages: {
+    1: number
+    2: number
+    3: number
+    4: number
+    5: number
+  }
+}
+
+export interface MedicalHistory {
+  patientId: string
+  patientName: string
+  patientEmail: string
+  patientPhone: string
+  totalAppointments: number
+  totalPrescriptions: number
+  appointments: AppointmentHistoryItem[]
+  dateRange?: {
+    startDate: string
+    endDate: string
+  }
+}
+
+export interface AppointmentHistoryItem {
+  id: string
+  date: string
+  doctorName: string
+  doctorId: string
+  status: string
+  consultationType: string
+  diagnosis?: string
+  prescription?: {
+    id: string
+    medicines: Medicine[]
+    instructions?: string
+  }
+}

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Review System</title>
+</head>
+<body>
+    <h1>Testing Review System with Local Storage</h1>
+    
+    <script>
+        // Add some test appointments to localStorage
+        const testAppointments = [
+            {
+                id: "test_appointment_1",
+                patientId: "patient1",
+                doctorId: "doctor1", 
+                patientName: "John Patient",
+                patientPhone: "1234567890",
+                patientEmail: "patient@example.com",
+                doctor: {
+                    id: "doctor1",
+                    name: "Dr. Adarsh Babu",
+                    specialization: "Ophthalmologist"
+                },
+                date: "2025-08-12",
+                timeSlot: "10:00 AM - 10:30 AM",
+                symptoms: "Eye irritation and blurred vision",
+                status: "completed",
+                diagnosis: "Mild dry eye syndrome",
+                prescription: "Artificial tears, 3 times daily",
+                consultationFee: 800,
+                createdAt: "2025-08-10T09:00:00Z"
+            },
+            {
+                id: "test_appointment_2", 
+                patientId: "patient1",
+                doctorId: "doctor1",
+                patientName: "John Patient",
+                patientPhone: "1234567890",
+                patientEmail: "patient@example.com",
+                doctor: {
+                    id: "doctor1",
+                    name: "Dr. Adarsh Babu", 
+                    specialization: "Ophthalmologist"
+                },
+                date: "2025-08-05",
+                timeSlot: "2:00 PM - 2:30 PM",
+                symptoms: "Follow-up checkup",
+                status: "completed",
+                diagnosis: "Normal vision, dry eye improving",
+                prescription: "Continue current medication",
+                consultationFee: 800,
+                createdAt: "2025-08-03T14:00:00Z"
+            }
+        ];
+
+        // Get existing appointments or use empty array
+        const existingAppointments = JSON.parse(localStorage.getItem("appointments") || "[]");
+        
+        // Merge test appointments with existing ones (avoid duplicates)
+        const allAppointments = [...existingAppointments];
+        testAppointments.forEach(testApp => {
+            if (!allAppointments.find(app => app.id === testApp.id)) {
+                allAppointments.push(testApp);
+            }
+        });
+
+        // Save to localStorage
+        localStorage.setItem("appointments", JSON.stringify(allAppointments));
+        
+        console.log("Test appointments added:", allAppointments);
+        alert("Test appointments added! You can now test the review system.");
+        
+        // Also clear any existing reviews to start fresh
+        localStorage.setItem("reviews", "[]");
+        console.log("Reviews cleared for fresh testing");
+    </script>
+</body>
+</html>
